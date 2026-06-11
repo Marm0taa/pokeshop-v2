@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block contenido %}
+
+<section class="form-seccion">
+  <div class="form-caja">
+    <h2>🔐 Panel Administrador</h2>
+
+    <form method="POST">
+      <label>Usuario</label>
+      <input type="text" name="usuario" placeholder="admin" required>
+
+      <label>Contraseña</label>
+      <input type="password" name="password" placeholder="••••••••" required>
+
+      <button type="submit" class="btn">Entrar →</button>
+    </form>
+  </div>
+</section>
+
+{% endblock %}

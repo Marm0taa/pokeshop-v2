@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block contenido %}
+
+<section class="seccion">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+    <h2>Panel de Administrador</h2>
+    <a href="{{ url_for('admin_logout') }}" class="btn rojo">Salir del admin</a>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="dashboard">
+    <div class="stat-card">
+      <div class="stat-num">{{ total_cartas }}</div>
+      <div class="stat-label">Cartas en catálogo</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">{{ total_usuarios }}</div>
+      <div class="stat-label">Usuarios registrados</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">S/ {{ valor_total }}</div>
+      <div class="stat-label">Valor del inventario</div>
+    </div>
+  </div>
+
+  <!-- ═══ GRÁFICO: cartas por categoría ═══ -->
+  <div class="info-box" style="margin-bottom:40px;">
+    <h3 style="margin-bottom:20px;">Cartas por categoría</h3>
+    <div class="grafico">
+      {% for cat in conteo_categorias %}
+        {% set porcentaje = (cat.cantidad / total_cartas * 100) if total_cartas > 0 else 0 %}
+        <div class="grafico-fila">
+          <span class="grafico-label">{{ cat.categoria }}</span>
+          <div class="grafico-barra-bg">
+            <div class="grafico-barra" style="width: {{ porcentaje }}%;"></div>
+          </div>
+          <span class="grafico-valor">{{ cat.cantidad }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ═══ FORMULARIO AGREGAR CARTA ═══ -->
+  <div class="form-caja" style="max-width:100%; margin-bottom:40px;">
+    <h3 style="margin-bottom:16px;">Agregar nueva carta</h3>
+    <form method="POST" action="{{ url_for('admin_agregar') }}">
+      <label>Nombre de la carta</label>
+      <input type="text" name="nombre" placeholder="Ej: Pikachu ex" required>
+
+      <label>Precio (S/)</label>
+      <input type="number" name="precio" placeholder="45" required>
+
+      <label>Categoría</label>
+      <select name="categoria" required>
+        {% for cat in categorias %}
+          <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+      </select>
+
+      <label>URL de la imagen</label>
+      <input type="text" name="imagen" placeholder="https://images.pokemontcg.io/..." required>
+
+      <button type="submit" class="btn">+ Agregar carta</button>
+    </form>
+  </div>
+
+  <!-- ═══ LISTA DE CARTAS ═══ -->
+  <h3 style="margin-bottom:16px;">Cartas en el catálogo ({{ cartas|length }})</h3>
+
+  {% if cartas %}
+  <table class="tabla-carrito">
+    <thead>
+      <tr>
+        <th>Imagen</th>
+        <th>Nombre</th>
+        <th>Categoría</th>
+        <th>Precio</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for carta in cartas %}
+      <tr>
+        <td><img src="{{ carta.imagen }}" alt="{{ carta.nombre }}" style="width:50px; border-radius:4px;"></td>
+        <td>{{ carta.nombre }}</td>
+        <td>{{ carta.categoria }}</td>
+        <td>S/ {{ carta.precio }}</td>
+        <td><a href="{{ url_for('admin_eliminar', id=carta.id) }}" class="btn rojo">Eliminar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="vacio">No hay cartas todavía. Agrega la primera arriba ⬆️</p>
+  {% endif %}
+
+</section>
+
+{% endblock %}
