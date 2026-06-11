@@ -1,5 +1,5 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  PokéShop TCG — con Admin y Servicios
+#  PokéShop TCG — Admin, Categorías y Dashboard
 #  Tecnologías: Flask, SQLite, HTML, CSS
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -10,9 +10,13 @@ import hashlib
 app = Flask(__name__)
 app.secret_key = 'pokeshop123'
 
-# Credenciales del administrador (fijas, no se registra)
+# ── Credenciales del administrador ──────────────
+# Para cambiarlas, edita estas dos líneas:
 ADMIN_USUARIO  = 'aaron'
-ADMIN_PASSWORD = '123456'
+ADMIN_PASSWORD = '1234'
+
+# Categorías disponibles para las cartas
+CATEGORIAS = ['Fuego', 'Agua', 'Eléctrico', 'Planta', 'Psíquico', 'Dragón', 'Normal']
 
 # --- Conectar a la base de datos ---
 def get_db():
@@ -31,15 +35,38 @@ def init_db():
                 password TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS cartas (
-                id      INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre  TEXT NOT NULL,
-                precio  INTEGER NOT NULL,
-                imagen  TEXT NOT NULL
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre    TEXT NOT NULL,
+                precio    INTEGER NOT NULL,
+                imagen    TEXT NOT NULL,
+                categoria TEXT NOT NULL DEFAULT 'Normal'
             );
         ''')
 
 def encriptar(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
+# --- Cargar cartas de ejemplo (solo si la tabla está vacía) ---
+def cargar_ejemplos():
+    with get_db() as db:
+        total = db.execute('SELECT COUNT(*) FROM cartas').fetchone()[0]
+        if total == 0:
+            ejemplos = [
+                ('Pikachu ex',    45,  'https://images.pokemontcg.io/sv3pt5/28_hires.png', 'Eléctrico'),
+                ('Charizard ex',  120, 'https://images.pokemontcg.io/sv1/6_hires.png',     'Fuego'),
+                ('Mewtwo ex',     80,  'https://images.pokemontcg.io/sv2/52_hires.png',    'Psíquico'),
+                ('Gardevoir ex',  60,  'https://images.pokemontcg.io/sv3/91_hires.png',    'Psíquico'),
+                ('Lucario ex',    35,  'https://images.pokemontcg.io/sv4/55_hires.png',    'Normal'),
+                ('Eevee ex',      50,  'https://images.pokemontcg.io/sv5/25_hires.png',    'Normal'),
+                ('Blastoise ex',  95,  'https://images.pokemontcg.io/sv3pt5/9_hires.png',  'Agua'),
+                ('Rayquaza ex',   110, 'https://images.pokemontcg.io/sv6/110_hires.png',   'Dragón'),
+                ('Venusaur ex',   85,  'https://images.pokemontcg.io/sv3pt5/3_hires.png',  'Planta'),
+            ]
+            for nombre, precio, imagen, categoria in ejemplos:
+                db.execute(
+                    'INSERT INTO cartas (nombre, precio, imagen, categoria) VALUES (?, ?, ?, ?)',
+                    (nombre, precio, imagen, categoria)
+                )
 
 # ══════════════════════════════════════════════
 #  RUTAS PÚBLICAS
@@ -49,12 +76,24 @@ def encriptar(password):
 def inicio():
     return render_template('inicio.html', usuario=session.get('usuario'))
 
-# CATÁLOGO — lee las cartas desde la base de datos
+# CATÁLOGO — lee de la base de datos, con filtro opcional por categoría
 @app.route('/catalogo')
 def catalogo():
+    categoria = request.args.get('categoria')  # ?categoria=Fuego en la URL
+
     with get_db() as db:
-        cartas = db.execute('SELECT * FROM cartas').fetchall()
-    return render_template('catalogo.html', cartas=cartas, usuario=session.get('usuario'))
+        if categoria and categoria != 'Todos':
+            cartas = db.execute('SELECT * FROM cartas WHERE categoria=?', (categoria,)).fetchall()
+        else:
+            cartas = db.execute('SELECT * FROM cartas').fetchall()
+
+    return render_template(
+        'catalogo.html',
+        cartas=cartas,
+        categorias=CATEGORIAS,
+        categoria_activa=categoria or 'Todos',
+        usuario=session.get('usuario')
+    )
 
 # SERVICIOS — página de gradeado
 @app.route('/servicios')
@@ -139,41 +178,63 @@ def vaciar():
 #  PANEL ADMIN
 # ══════════════════════════════════════════════
 
-# LOGIN ADMIN
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         if request.form['usuario'] == ADMIN_USUARIO and \
            request.form['password'] == ADMIN_PASSWORD:
-            session['admin'] = True  # Marcar sesión como admin
+            session['admin'] = True
             return redirect(url_for('admin_panel'))
         flash('Credenciales incorrectas.', 'error')
     return render_template('admin_login.html')
 
-# PANEL PRINCIPAL — lista todas las cartas
+# DASHBOARD — estadísticas generales
 @app.route('/admin')
 def admin_panel():
-    if not session.get('admin'):  # Si no es admin, redirigir
+    if not session.get('admin'):
         return redirect(url_for('admin_login'))
-    with get_db() as db:
-        cartas = db.execute('SELECT * FROM cartas').fetchall()
-    return render_template('admin_panel.html', cartas=cartas)
 
-# AGREGAR CARTA
+    with get_db() as db:
+        cartas    = db.execute('SELECT * FROM cartas').fetchall()
+        usuarios  = db.execute('SELECT COUNT(*) FROM usuarios').fetchone()[0]
+
+        # Estadísticas para el dashboard
+        total_cartas = len(cartas)
+        valor_total  = sum(c['precio'] for c in cartas)
+
+        # Conteo de cartas por categoría (para el gráfico)
+        conteo_categorias = db.execute('''
+            SELECT categoria, COUNT(*) as cantidad
+            FROM cartas
+            GROUP BY categoria
+        ''').fetchall()
+
+    return render_template(
+        'admin_panel.html',
+        cartas=cartas,
+        categorias=CATEGORIAS,
+        total_cartas=total_cartas,
+        total_usuarios=usuarios,
+        valor_total=valor_total,
+        conteo_categorias=conteo_categorias
+    )
+
 @app.route('/admin/agregar', methods=['POST'])
 def admin_agregar():
     if not session.get('admin'):
         return redirect(url_for('admin_login'))
-    nombre = request.form['nombre']
-    precio = request.form['precio']
-    imagen = request.form['imagen']
+    nombre    = request.form['nombre']
+    precio    = request.form['precio']
+    imagen    = request.form['imagen']
+    categoria = request.form['categoria']
     with get_db() as db:
-        db.execute('INSERT INTO cartas (nombre, precio, imagen) VALUES (?, ?, ?)',
-                   (nombre, precio, imagen))
+        db.execute(
+            'INSERT INTO cartas (nombre, precio, imagen, categoria) VALUES (?, ?, ?, ?)',
+            (nombre, precio, imagen, categoria)
+        )
     flash(f'Carta "{nombre}" agregada correctamente.', 'ok')
     return redirect(url_for('admin_panel'))
 
-# ELIMINAR CARTA
 @app.route('/admin/eliminar/<int:id>')
 def admin_eliminar(id):
     if not session.get('admin'):
@@ -183,7 +244,6 @@ def admin_eliminar(id):
     flash('Carta eliminada.', 'ok')
     return redirect(url_for('admin_panel'))
 
-# LOGOUT ADMIN
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin', None)
@@ -192,8 +252,7 @@ def admin_logout():
 # ══════════════════════════════════════════════
 #  INICIAR APP
 # ══════════════════════════════════════════════
-init_db()
-cargar_ejemplos()
-
 if __name__ == '__main__':
+    init_db()
+    cargar_ejemplos()
     app.run(debug=True)
