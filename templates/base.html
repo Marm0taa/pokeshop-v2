@@ -14,7 +14,6 @@
       <a href="{{ url_for('catalogo') }}">Catálogo</a>
       <a href="{{ url_for('servicios') }}">Servicios</a>
       <a href="{{ url_for('carrito') }}">🛒 Carrito</a>
-      <a href="{{ url_for('admin_login') }}">⚙️ Admin</a>
 
       {% if usuario %}
         <!-- Si hay sesión activa, mostramos el usuario y botón salir -->
@@ -44,7 +43,9 @@
 
   <footer>
     <p>⚡ PokéShop TCG — Proyecto Final</p>
+    <a href="{{ url_for('admin_login') }}" class="admin-link">⚙</a>
   </footer>
 
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -12,8 +12,8 @@ app.secret_key = 'pokeshop123'
 
 # ── Credenciales del administrador ──────────────
 # Para cambiarlas, edita estas dos líneas:
-ADMIN_USUARIO  = 'aaron'
-ADMIN_PASSWORD = '1234'
+ADMIN_USUARIO  = 'admin'
+ADMIN_PASSWORD = 'admin123'
 
 # Categorías disponibles para las cartas
 CATEGORIAS = ['Fuego', 'Agua', 'Eléctrico', 'Planta', 'Psíquico', 'Dragón', 'Normal']
@@ -252,7 +252,8 @@ def admin_logout():
 # ══════════════════════════════════════════════
 #  INICIAR APP
 # ══════════════════════════════════════════════
+init_db()
+cargar_ejemplos()
+
 if __name__ == '__main__':
-    init_db()
-    cargar_ejemplos()
     app.run(debug=True)

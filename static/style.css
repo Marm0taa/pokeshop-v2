@@ -406,3 +406,98 @@ footer {
   .hero-bg { background-position: center 10%; min-height: 70vh; }
   .hero-content { max-width: 100%; }
 }
+
+/* ── Transición del fondo del hero ────────── */
+.hero-bg {
+  transition: opacity .4s ease-in-out, background-image .4s ease-in-out;
+}
+
+/* ── Link admin discreto en el footer ─────── */
+footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-link {
+  position: absolute;
+  right: 24px;
+  color: var(--borde);
+  font-size: 1rem;
+  opacity: .4;
+  transition: opacity .2s, color .2s, transform .3s;
+}
+.admin-link:hover {
+  opacity: 1;
+  color: var(--amarillo);
+  transform: rotate(90deg);
+}
+
+/* ── Botones más vivos (hover + click) ────── */
+.btn, .btn-nav {
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+.btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(255,215,0,.3);
+}
+.btn:active, .btn.pop {
+  transform: scale(0.93);
+}
+.btn-nav:hover {
+  transform: translateY(-1px);
+  border-color: var(--amarillo);
+}
+.btn-outline:hover {
+  background: var(--amarillo);
+  color: #000;
+  border-color: var(--amarillo);
+}
+
+/* ── Efecto pop al agregar al carrito ─────── */
+@keyframes pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.85); }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.btn.pop { animation: pop .3s ease; }
+
+/* ── Cartas con hover más interactivo ─────── */
+.carta {
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.carta:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(255,215,0,.15);
+  border-color: var(--amarillo);
+}
+.carta img { transition: transform .3s ease; }
+.carta:hover img { transform: scale(1.04); }
+
+/* ── Carrito (navbar) con animación ───────── */
+.nav-links a[href*="carrito"] {
+  position: relative;
+  transition: transform .2s ease;
+}
+.nav-links a[href*="carrito"]:hover {
+  transform: scale(1.1);
+}
+
+/* ── Filas del carrito interactivas ───────── */
+.tabla-carrito tbody tr {
+  transition: background .2s ease;
+}
+.tabla-carrito tbody tr:hover {
+  background: rgba(255,215,0,.05);
+}
+
+/* ── Filtros con hover ────────────────────── */
+.filtro-btn {
+  transition: transform .15s ease, background .2s ease, color .2s ease;
+}
+.filtro-btn:hover:not(.activo) {
+  transform: translateY(-2px);
+  border-color: var(--amarillo);
+  color: var(--amarillo);
+}

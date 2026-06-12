@@ -20,7 +20,7 @@
       <img src="{{ carta.imagen }}" alt="{{ carta.nombre }}">
       <h3>{{ carta.nombre }}</h3>
       <p class="precio">S/ {{ carta.precio }}.00</p>
-      <a href="{{ url_for('agregar', nombre=carta.nombre, precio=carta.precio) }}" class="btn">+ Agregar</a>
+      <a href="{{ url_for('agregar', nombre=carta.nombre, precio=carta.precio) }}" class="btn btn-agregar">+ Agregar</a>
     </div>
     {% endfor %}
   </div>
