@@ -12,8 +12,8 @@ app.secret_key = 'pokeshop123'
 
 # ── Credenciales del administrador ──────────────
 # Para cambiarlas, edita estas dos líneas:
-ADMIN_USUARIO  = 'admin'
-ADMIN_PASSWORD = 'admin123'
+ADMIN_USUARIO  = 'aaron'
+ADMIN_PASSWORD = '1234'
 
 # Categorías disponibles para las cartas
 CATEGORIAS = ['Fuego', 'Agua', 'Eléctrico', 'Planta', 'Psíquico', 'Dragón', 'Normal']
@@ -71,6 +71,18 @@ def cargar_ejemplos():
 # ══════════════════════════════════════════════
 #  RUTAS PÚBLICAS
 # ══════════════════════════════════════════════
+
+# Esto corre antes de CADA petición. Si la tabla 'cartas' no existe
+# (por ejemplo porque Render reinició el contenedor y borró tienda.db),
+# la vuelve a crear y carga los ejemplos automáticamente.
+@app.before_request
+def asegurar_base_datos():
+    try:
+        with get_db() as db:
+            db.execute('SELECT 1 FROM cartas LIMIT 1')
+    except sqlite3.OperationalError:
+        init_db()
+        cargar_ejemplos()
 
 @app.route('/')
 def inicio():
@@ -252,8 +264,7 @@ def admin_logout():
 # ══════════════════════════════════════════════
 #  INICIAR APP
 # ══════════════════════════════════════════════
-init_db()
-cargar_ejemplos()
-
 if __name__ == '__main__':
+    init_db()
+    cargar_ejemplos()
     app.run(debug=True)
