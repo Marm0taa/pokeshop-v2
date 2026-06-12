@@ -1,10 +1,40 @@
 {% extends 'base.html' %}
 {% block contenido %}
 
-<section class="hero">
-  <h1>Colecciona.<br><span class="amarillo">Juega. Gana.</span></h1>
-  <p>Las mejores cartas Pokémon originales disponibles.</p>
-  <a href="{{ url_for('catalogo') }}" class="btn">Ver catálogo →</a>
+<!-- HERO con fondo de cartas -->
+<section class="hero hero-bg">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-tag">⚡ TRADING CARD GAME STORE</p>
+    <h1>Colecciona.<br><span class="amarillo">Juega. Gana.</span></h1>
+    <p class="hero-sub">Las mejores cartas Pokémon originales, raras y holográficas. Encuentra tus favoritas y arma tu mazo perfecto.</p>
+    <div class="hero-botones">
+      <a href="{{ url_for('catalogo') }}" class="btn">Ver catálogo →</a>
+      <a href="{{ url_for('servicios') }}" class="btn btn-outline">Servicios de gradeado</a>
+    </div>
+  </div>
+</section>
+
+<!-- DESTACADOS -->
+<section class="seccion">
+  <h2>¿Por qué PokéShop?</h2>
+  <div class="ventajas">
+    <div class="ventaja-card">
+      <div class="ventaja-icon">🃏</div>
+      <h3>Cartas originales</h3>
+      <p>Todas nuestras cartas son 100% auténticas y verificadas.</p>
+    </div>
+    <div class="ventaja-card">
+      <div class="ventaja-icon">🚀</div>
+      <h3>Envío rápido</h3>
+      <p>Recibe tus cartas en tiempo récord, bien protegidas.</p>
+    </div>
+    <div class="ventaja-card">
+      <div class="ventaja-icon">🏆</div>
+      <h3>Gradeado profesional</h3>
+      <p>Certifica el valor de tus cartas con PSA, BGS y CGC.</p>
+    </div>
+  </div>
 </section>
 
 {% endblock %}

@@ -252,8 +252,7 @@ def admin_logout():
 # ══════════════════════════════════════════════
 #  INICIAR APP
 # ══════════════════════════════════════════════
-init_db()
-cargar_ejemplos()
-
 if __name__ == '__main__':
+    init_db()
+    cargar_ejemplos()
     app.run(debug=True)
